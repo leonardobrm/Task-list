@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { uuid } from 'uuidv4';
 
 import '../styles/tasklist.scss'
 
@@ -13,17 +14,39 @@ interface Task {
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
-
+  const [isError, setIsError] = useState(false);
+  
   function handleCreateNewTask() {
-    // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    if(newTaskTitle){
+      const newTask = {
+        id: 1 + tasks.length,
+        title: newTaskTitle,
+        isComplete: false,
+      }
+      setTasks([...tasks, newTask]);
+      setIsError(false)
+    }else {
+      setIsError(true)
+    }
   }
 
-  function handleToggleTaskCompletion(id: number) {
+  const color = isError ? '3px solid red' : 0;
+
+  function handleToggleTaskCompletion(id: number) { 
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    const newTasks = tasks.map(task => task.id === id ? {
+      ...task,
+      isComplete: !task.isComplete
+    }: task);
+    
+    setTasks(newTasks);
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+
+    const removeTasks = tasks.filter(task => task.id !== id);
+    setTasks(removeTasks);
   }
 
   return (
@@ -37,6 +60,7 @@ export function TaskList() {
             placeholder="Adicionar novo todo" 
             onChange={(e) => setNewTaskTitle(e.target.value)}
             value={newTaskTitle}
+            style={{border: `${color}`}}
           />
           <button type="submit" data-testid="add-task-button" onClick={handleCreateNewTask}>
             <FiCheckSquare size={16} color="#fff"/>
